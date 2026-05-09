@@ -12,6 +12,49 @@ IMAGE_PATH = os.path.join(SCRIPT_DIR, "cat_icon.png")
 # Search for claude in PATH, with common fallbacks
 CLAUDE_CMD = shutil.which("claude") or shutil.which("claude.exe") or "claude"
 
+# Auto-start: shortcut in Windows Startup folder
+STARTUP_DIR = os.path.join(os.environ["APPDATA"],
+                           r"Microsoft\Windows\Start Menu\Programs\Startup")
+SHORTCUT_PATH = os.path.join(STARTUP_DIR, "cc-cat.lnk")
+
+def is_autostart_enabled():
+    return os.path.exists(SHORTCUT_PATH)
+
+def _find_pythonw():
+    """Find a real pythonw.exe (skip 0-byte Windows App Execution Aliases)."""
+    import shutil as _shutil
+    for cmd in ("pythonw", "pythonw.exe"):
+        p = _shutil.which(cmd)
+        if p and os.path.isfile(p) and os.path.getsize(p) > 0:
+            return p
+    # Fallback: derive from the current Python interpreter
+    py_exe = sys.executable
+    if py_exe:
+        pw = py_exe.replace("python.exe", "pythonw.exe")
+        if os.path.isfile(pw) and os.path.getsize(pw) > 0:
+            return pw
+    raise RuntimeError("Cannot find a real pythonw.exe. Install Python from python.org.")
+
+def toggle_autostart():
+    if is_autostart_enabled():
+        if os.path.islink(SHORTCUT_PATH):
+            os.unlink(SHORTCUT_PATH)
+        else:
+            os.remove(SHORTCUT_PATH)
+    else:
+        pythonw = _find_pythonw()
+        ps = f'''
+$ws = New-Object -ComObject WScript.Shell
+$lnk = $ws.CreateShortcut("{SHORTCUT_PATH}")
+$lnk.TargetPath = "{pythonw}"
+$lnk.Arguments = '"{os.path.join(SCRIPT_DIR, "cc_cat.py")}"'
+$lnk.WorkingDirectory = "{SCRIPT_DIR}"
+$lnk.WindowStyle = 7
+$lnk.Save()
+'''
+        subprocess.run(["powershell", "-NoProfile", "-Command", ps],
+                       capture_output=True)
+
 class FloatingClaude:
     def __init__(self):
         self.root = tk.Tk()
@@ -58,10 +101,11 @@ class FloatingClaude:
         self.canvas.bind("<Enter>", lambda e: self.root.wm_attributes("-alpha", 1.0))
         self.canvas.bind("<Leave>", lambda e: self.root.wm_attributes("-alpha", 0.4))
 
-        # Context menu
+        # Context menu (labels updated on right-click to reflect current autostart state)
         self.menu = tk.Menu(self.root, tearoff=0)
         self.menu.add_command(label="Launch Claude Code", command=self.launch_claude)
         self.menu.add_separator()
+        self.menu.add_command(label="开机自启: 开启", command=self._on_toggle_autostart)
         self.menu.add_command(label="Exit", command=self.root.destroy)
 
         # Position: bottom-right corner of screen
@@ -93,8 +137,19 @@ class FloatingClaude:
             self.launch_claude()
 
     def on_right_click(self, event):
-        """Right click: show context menu."""
+        """Right click: show context menu with up-to-date autostart label."""
+        if is_autostart_enabled():
+            self.menu.entryconfigure(2, label="开机自启: 关闭")
+        else:
+            self.menu.entryconfigure(2, label="开机自启: 开启")
         self.menu.tk_popup(event.x_root, event.y_root)
+
+    def _on_toggle_autostart(self):
+        toggle_autostart()
+        if is_autostart_enabled():
+            self.menu.entryconfigure(2, label="开机自启: 关闭")
+        else:
+            self.menu.entryconfigure(2, label="开机自启: 开启")
 
     def launch_claude(self):
         subprocess.Popen(

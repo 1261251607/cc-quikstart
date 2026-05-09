@@ -84,3 +84,15 @@ This auto-crops white borders and flood-fills the background with transparency, 
 | `cat.ico` | Windows icon for shortcuts |
 | `setup_image.py` | Image processing utility |
 | `start_cccat.bat` / `启动悬浮窗.bat` | Double-click launchers |
+
+## Changelog
+
+### v2.0 — Auto-start toggle + bugfixes
+
+**New:**
+- Right-click context menu now has an "开机自启: 开启/关闭" option that creates or removes a shortcut in the Windows Startup folder (`shell:startup`), so cc-cat can automatically launch when you log in.
+
+**Fixed:**
+- Shortcut (`cc-cat.lnk`) and bat files were using a 0-byte `pythonw.exe` App Execution Alias stub from `WindowsApps`, which silently failed to launch. Switched to the real `pythonw.exe` from the actual Python installation.
+- `cc-cat.lnk` previously pointed to a non-existent path on the Desktop; now targets `pythonw.exe` directly with the script as an argument.
+- Bat files no longer rely on `pythonw` being in PATH at launch time — they use the full executable path.

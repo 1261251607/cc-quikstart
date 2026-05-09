@@ -1,3 +1,2 @@
 @echo off
-cd /d "%~dp0"
-start "" pythonw "%~dp0cc_cat.py"
+start "" "C:\Users\Scholar\AppData\Local\Python\bin\pythonw.exe" "%~dp0cc_cat.py"
