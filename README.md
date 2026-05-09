@@ -47,15 +47,15 @@ Or just double-click `start_cccat.bat` (English) / `启动悬浮窗.bat` (Chines
 
 ### Optional: create a desktop shortcut with the cat icon
 
-1. Right-click `start_cccat.bat` → Create shortcut
-2. Right-click the shortcut → Properties → Change Icon
-3. Browse to `cat.ico` in the repo folder
-4. Move the shortcut to your desktop
+```bash
+python setup_shortcut.py
+```
+
+This creates `cc-cat.lnk` on your desktop with the cat icon, pointing directly to your Python installation.
 
 ### Optional: auto-start with Windows
 
-1. Press `Win + R`, type `shell:startup`, Enter
-2. Copy the shortcut into the Startup folder
+Right-click the cat → **开机自启: 开启**. This creates a shortcut in the Windows Startup folder so cc-cat launches automatically when you log in. Right-click again → **开机自启: 关闭** to remove it.
 
 ## How it works
 
@@ -83,6 +83,7 @@ This auto-crops white borders and flood-fills the background with transparency, 
 | `images.jpg` | Original source image |
 | `cat.ico` | Windows icon for shortcuts |
 | `setup_image.py` | Image processing utility |
+| `setup_shortcut.py` | One-click desktop shortcut creator |
 | `start_cccat.bat` / `启动悬浮窗.bat` | Double-click launchers |
 
 ## Changelog
