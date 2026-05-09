@@ -25,15 +25,21 @@ No start menu, no terminal typing. Just a cat. Click. Done.
 
 ## Installation
 
+**Method 1 — Download ZIP** (no git needed)
+
+Click the green **Code** button at the top of this page → **Download ZIP**. Extract the folder, then:
+
 ```bash
-# 1. Clone the repo
+pip install pillow
+pythonw cc_cat.py
+```
+
+**Method 2 — Git clone**
+
+```bash
 git clone https://github.com/1261251607/cc-quikstart.git
 cd cc-quikstart
-
-# 2. Install Python dependency
 pip install pillow
-
-# 3. Launch
 pythonw cc_cat.py
 ```
 
