@@ -17,8 +17,8 @@ class FloatingClaude:
         self.root = tk.Tk()
         self.root.title("cc-cat")
         self.root.overrideredirect(True)      # borderless
-        self.root.wm_attributes("-topmost", True)  # always on top
         self.root.wm_attributes("-transparentcolor", "magenta")
+        self.root.wm_attributes("-alpha", 0.4)       # semi-transparent by default
 
         # Load RGBA image, composite onto magenta for transparentcolor keying
         raw = Image.open(IMAGE_PATH).convert("RGBA")
@@ -53,6 +53,10 @@ class FloatingClaude:
         self.canvas.bind("<ButtonPress-1>", self.on_press)
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
+
+        # Mouse hover: opaque when cursor is on the cat, translucent otherwise
+        self.canvas.bind("<Enter>", lambda e: self.root.wm_attributes("-alpha", 1.0))
+        self.canvas.bind("<Leave>", lambda e: self.root.wm_attributes("-alpha", 0.4))
 
         # Context menu
         self.menu = tk.Menu(self.root, tearoff=0)
