@@ -8,6 +8,8 @@ import shutil
 
 # Use script directory as base path — works from any clone location
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_PATH = os.path.abspath(__file__)
+_START_MTIME = os.path.getmtime(SCRIPT_PATH)  # detect file updates at runtime
 IMAGE_PATH = os.path.join(SCRIPT_DIR, "cat_icon.png")
 # Search for claude in PATH, with common fallbacks
 CLAUDE_CMD = shutil.which("claude") or shutil.which("claude.exe") or "claude"
@@ -138,6 +140,8 @@ class FloatingClaude:
 
     def on_right_click(self, event):
         """Right click: show context menu with up-to-date autostart label."""
+        if self._restart_if_stale():
+            return
         if is_autostart_enabled():
             self.menu.entryconfigure(2, label="开机自启: 关闭")
         else:
@@ -151,7 +155,21 @@ class FloatingClaude:
         else:
             self.menu.entryconfigure(2, label="开机自启: 开启")
 
+    def _restart_if_stale(self):
+        """Restart this script if the source file was modified since startup."""
+        if os.path.getmtime(SCRIPT_PATH) <= _START_MTIME:
+            return False
+        try:
+            pythonw = _find_pythonw()
+            subprocess.Popen([pythonw, SCRIPT_PATH])
+        except Exception:
+            pass
+        self.root.destroy()
+        return True
+
     def launch_claude(self):
+        if self._restart_if_stale():
+            return
         subprocess.Popen(
             [CLAUDE_CMD],
             creationflags=subprocess.CREATE_NEW_CONSOLE
